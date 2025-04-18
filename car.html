@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Car Dodger Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin: 20px 0;
+    }
+    canvas {
+      background: linear-gradient(to bottom, #1a1a1a, #333);
+      border: 3px solid #fff;
+      border-radius: 10px;
+    }
+    .instructions {
+      margin-top: 10px;
+    }
+    .score {
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚗 Car Dodger Game</h1>
+  <canvas id="gameCanvas" width="300" height="500"></canvas>
+  <div class="instructions">Use ← / → arrow keys to move</div>
+  <div class="score">Score: <span id="score">0</span></div>
+  <button onclick="startGame()">Start Game</button>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const carWidth = 40;
+    const carHeight = 60;
+    let carX = canvas.width / 2 - carWidth / 2;
+    const carY = canvas.height - carHeight - 10;
+    let score = 0;
+    let enemies = [];
+    let gameRunning = false;
+
+    const enemyWidth = 40;
+    const enemyHeight = 60;
+    const enemySpeed = 4;
+
+    document.addEventListener("keydown", (e) => {
+      if (!gameRunning) return;
+      if (e.key === "ArrowLeft" && carX > 0) {
+        carX -= 20;
+      } else if (e.key === "ArrowRight" && carX < canvas.width - carWidth) {
+        carX += 20;
+      }
+    });
+
+    function drawCar() {
+      ctx.fillStyle = "#00ffcc";
+      ctx.fillRect(carX, carY, carWidth, carHeight);
+    }
+
+    function drawEnemy(enemy) {
+      ctx.fillStyle = "#ff3333";
+      ctx.fillRect(enemy.x, enemy.y, enemyWidth, enemyHeight);
+    }
+
+    function updateEnemies() {
+      for (let i = 0; i < enemies.length; i++) {
+        enemies[i].y += enemySpeed;
+        if (enemies[i].y > canvas.height) {
+          enemies[i].y = -enemyHeight;
+          enemies[i].x = Math.floor(Math.random() * (canvas.width - enemyWidth));
+          score++;
+          document.getElementById("score").innerText = score;
+        }
+      }
+    }
+
+    function checkCollision() {
+      for (let i = 0; i < enemies.length; i++) {
+        if (
+          carX < enemies[i].x + enemyWidth &&
+          carX + carWidth > enemies[i].x &&
+          carY < enemies[i].y + enemyHeight &&
+          carY + carHeight > enemies[i].y
+        ) {
+          gameRunning = false;
+          alert("Game Over! Your score: " + score);
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCar();
+      enemies.forEach(drawEnemy);
+      updateEnemies();
+      checkCollision();
+
+      if (gameRunning) requestAnimationFrame(draw);
+    }
+
+    function startGame() {
+      score = 0;
+      carX = canvas.width / 2 - carWidth / 2;
+      enemies = [
+        { x: 60, y: -60 },
+        { x: 180, y: -200 },
+      ];
+      gameRunning = true;
+      document.getElementById("score").innerText = score;
+      draw();
+    }
+  </script>
+</body>
+</html>
